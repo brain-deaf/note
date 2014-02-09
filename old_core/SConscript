@@ -1,0 +1,57 @@
+# vim: syntax=python
+
+t_units = [
+    'Packet',
+    'Player', 
+    'Instrument', 
+    'WaveSynth', 
+    'Note',
+    'Sample',
+    'Time',
+    'Offset',
+    'Beat',
+    'Exceptions'
+]
+
+sources = [i+'.cpp' for i in t_units]
+py_sources = ['core.cpp'] + [i+'_py.cpp' for i in t_units]
+
+# initialize the environment with just the stuff pure C++ targets need
+cpp=Environment()
+
+# note implicit concatenation -- make sure to leave spaces at the ends!
+cpp.MergeFlags([
+    '!pkg-config --cflags --libs ' 
+        'gstreamer-1.0 '
+        'gstreamer-plugins-base-1.0 ',
+    '-std=c++1y',
+    '-Wfatal-errors',
+    '-g',
+    '-lgstapp-1.0'
+])
+
+# define pure C++ targets
+prelude=cpp.Program(
+    'prelude',
+    sources+['demos/prelude.cpp']
+)
+
+# initialize environment for building stuff with boost.python
+py=cpp.Clone()
+pyflags=py.ParseFlags([
+    '!python3.3-config --cflags --ldflags',
+    '-lboost_python3'
+])
+# this flag is output by python3.3-config but g++ complains about it 
+pyflags['CCFLAGS'].remove('-Wstrict-prototypes')
+# if NDEBUG is defined, asserts don't work :(
+pyflags['CPPDEFINES'].remove('NDEBUG')
+
+py.MergeFlags(pyflags)
+
+# define python targets
+core_so=py.SharedLibrary(
+    'core',
+    sources+py_sources,
+    SHLIBPREFIX='',SHLIBSUFFIX='.so'
+)
