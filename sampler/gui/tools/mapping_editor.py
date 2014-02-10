@@ -33,11 +33,6 @@ class _button(Gtk.Button):
 		self.set_property("opacity", 0.5)
 		self.zone_grid_height = self._parent.grid_height
 
-		css = Gtk.CssProvider()
-		css.load_from_path('test.css')
-		screen = Gdk.Screen.get_default()
-		style_context = Gtk.StyleContext()
-		style_context.add_provider_for_screen(screen, css, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 		
 		self.connect('button-press-event', parent.on_button_press)
 		self.connect('motion-notify-event', self.on_motion)
@@ -116,11 +111,7 @@ class SampleEditorGrid(Gtk.Grid):
 		segment_height = total_height / self.grid_height
 		for i in range(0, 20):
 			button = _button(self, i, 0, 1, self.grid_height - (i*2))
-			if (i == 6):
-				self.attach(button, i, 4, button.width, button.height)
-				button.y = 4
-			else:
-				self.attach(button, i, 0, button.width, button.height)
+			self.attach(button, i, 0, button.width, button.height)
 			self.attach(_transparent_button(self), i, -1, 1, 1) 
 
 	def on_button_press(self, widget, event):
@@ -140,12 +131,19 @@ class MyApp(Gtk.Window):
 
 		cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
 		#self.get_property("window").set_cursor(cursor)
-		self.show_all()
 
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
 		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
 		self.connect('motion-notify-event', self.on_motion)
 		self.connect('button-release-event', self.on_button_release)
+
+		css = Gtk.CssProvider()
+		css.load_from_path('test.css')
+		screen = Gdk.Screen.get_default()
+		style_context = Gtk.StyleContext()
+		style_context.add_provider_for_screen(screen, css, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+		self.show_all()
 	
 	def on_motion(self, widget, event):
 		grid_height = self.mapping_editor.get_allocated_height()
