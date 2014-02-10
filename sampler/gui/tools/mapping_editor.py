@@ -91,7 +91,7 @@ class SampleEditorGrid(Gtk.Grid):
 		self.dragging = False
 		self.drag_start_y = 0
 		self.grid_height = 40
-		self.grid_width = 21
+		self.grid_width = 20
 		self.drag_widget = None
 
 		self.set_property("row-homogeneous", True)
@@ -171,10 +171,12 @@ class MyApp(Gtk.Window):
 			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_draft):
 				height_displacement = round((mouse_y - self.mapping_editor.drag_start_y) / cell_height)
 				width_displacement = round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
-				self.mapping_editor.remove(drag_widget)
-				self.mapping_editor.attach(drag_widget, drag_widget.x + width_displacement, drag_widget.y + height_displacement, drag_widget.width, drag_widget.height)
-				drag_widget.y_temp = drag_widget.y + height_displacement
-				drag_widget.x_temp = drag_widget.x + width_displacement
+				if (drag_widget.x + width_displacement >= 0 and drag_widget.y + height_displacement >=0
+					and drag_widget.x + width_displacement < self.mapping_editor.grid_width and drag_widget.y + height_displacement + drag_widget.height <= self.mapping_editor.grid_height):
+					self.mapping_editor.remove(drag_widget)
+					self.mapping_editor.attach(drag_widget, drag_widget.x + width_displacement, drag_widget.y + height_displacement, drag_widget.width, drag_widget.height)
+					drag_widget.y_temp = drag_widget.y + height_displacement
+					drag_widget.x_temp = drag_widget.x + width_displacement
 
 	def on_button_release(self, widget, event):
 		if self.mapping_editor.dragging:
