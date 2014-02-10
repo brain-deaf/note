@@ -91,7 +91,7 @@ class SampleEditorGrid(Gtk.Grid):
 		self.dragging = False
 		self.drag_start_y = 0
 		self.grid_height = 40
-		self.grid_width = 20
+		self.grid_width = 60
 		self.drag_widget = None
 
 		self.set_property("row-homogeneous", True)
@@ -109,10 +109,11 @@ class SampleEditorGrid(Gtk.Grid):
 
 		total_height = self._parent.get_size_request()[0]
 		segment_height = total_height / self.grid_height
-		for i in range(0, 20):
-			button = _button(self, i, 0, 1, self.grid_height - (i*2))
+		for i in range(0, self.grid_width):
+			button = _button(self, i, 0, 1, 20)
 			self.attach(button, i, 0, button.width, button.height)
 			self.attach(_transparent_button(self), i, -1, 1, 1) 
+		self.attach(_transparent_button(self), -1, 0, 1, self.grid_height) 
 
 	def on_button_press(self, widget, event):
 		if (self.get_property("window").get_cursor() != self.cursor_arrow):
