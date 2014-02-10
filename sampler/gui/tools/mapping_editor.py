@@ -14,9 +14,13 @@ class _transparent_button(Gtk.Button):
 		self._parent.get_property("window").set_cursor(self._parent.cursor_arrow)
 
 class _button(Gtk.Button):
-	def __init__(self, parent, grid_x):
+	def __init__(self, parent, x, y, width=0, height=0):
 		Gtk.Button.__init__(self)
 		self._parent = parent
+		self.x = x
+		self.y = y
+		self.width = width
+		self.height = height
 
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
 		self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK) 
@@ -32,7 +36,6 @@ class _button(Gtk.Button):
 		self.connect('button-release-event', self.on_button_release)
 
 		self.resize_margin = 5 #px
-		self.grid_x = grid_x
 
 	def on_motion(self, widget, event):
 		width = widget.get_allocated_width()
@@ -50,7 +53,6 @@ class _button(Gtk.Button):
 				flag = False
 
 			if (height - event.y <= self.resize_margin):
-				print("bottom resize", abs(height - event.y))
 				self._parent.get_property("window").set_cursor(self._parent.cursor_bottom_resize)
 				flag = False
 
@@ -98,16 +100,20 @@ class SampleEditorGrid(Gtk.Grid):
 		total_height = self._parent.get_size_request()[0]
 		segment_height = total_height / self.grid_height
 		for i in range(0, 20):
-			button = _button(self, i)
-			button.zone_grid_height = self.grid_height - (i*2)
-			self.attach(button, i, 0, 1, self.grid_height - (i*2))
+			button = _button(self, i, 0, 1, self.grid_height - (i*2))
+			if (i == 6):
+				self.attach(button, i, 4, button.width, button.height)
+				button.y = 4
+			else:
+				self.attach(button, i, 0, button.width, button.height)
 		self.attach(_transparent_button(self), 20, 0, 1, self.grid_height) 
 
 	def on_button_press(self, widget, event):
 		if (self.get_property("window").get_cursor() != self.cursor_arrow):
 			self.dragging = True
 			self.drag_widget = widget
-			self.drag_start_y = event.y
+			grid_height = self.get_allocated_height()
+			cell_height = grid_height / self.grid_height
 
 class MyApp(Gtk.Window):
 	def __init__(self):
@@ -128,11 +134,23 @@ class MyApp(Gtk.Window):
 	def on_motion(self, widget, event):
 		grid_height = self.mapping_editor.get_allocated_height()
 		cell_height = grid_height / self.mapping_editor.grid_height
+		drag_widget = self.mapping_editor.drag_widget
+		mouse_y = self.get_pointer()[1]
 		if self.mapping_editor.dragging:
-			new_height = round(event.y / cell_height)
-			if (new_height >= 1):
-				self.mapping_editor.remove(self.mapping_editor.drag_widget)
-				self.mapping_editor.attach(self.mapping_editor.drag_widget, self.mapping_editor.drag_widget.grid_x, 0, 1, new_height)
+			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_bottom_resize):
+				new_height = round(mouse_y / cell_height) - drag_widget.y
+				if (new_height >= 1):
+					self.mapping_editor.remove(drag_widget)
+					self.mapping_editor.attach(drag_widget, drag_widget.x, drag_widget.y, drag_widget.width, new_height)
+					drag_widget.height = new_height
+			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_top_resize):
+				new_cell   = round(mouse_y / cell_height)
+				new_height = round(drag_widget.height - (new_cell - drag_widget.y))
+				drag_widget.height = new_height
+				drag_widget.y = new_cell
+				if (new_height >= 1):
+					self.mapping_editor.remove(drag_widget)
+					self.mapping_editor.attach(drag_widget, drag_widget.x, new_cell, drag_widget.width, new_height)
 
 	def on_button_release(self, widget, event):
 		self.mapping_editor.dragging = False
