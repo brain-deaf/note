@@ -11,7 +11,8 @@ class _transparent_button(Gtk.Button):
 		self.connect('motion-notify-event', self.on_motion)
 	
 	def on_motion(self, widget, event):
-		self._parent.get_property("window").set_cursor(self._parent.cursor_arrow)
+		if not self._parent.dragging:
+			self._parent.get_property("window").set_cursor(self._parent.cursor_arrow)
 
 class _button(Gtk.Button):
 	def __init__(self, parent, x, y, width=1, height=1):
@@ -91,7 +92,7 @@ class SampleEditorGrid(Gtk.Grid):
 		self.dragging = False
 		self.drag_start_y = 0
 		self.grid_height = 40
-		self.grid_width = 60
+		self.grid_width =20
 		self.drag_widget = None
 
 		self.set_property("row-homogeneous", True)
@@ -107,12 +108,11 @@ class SampleEditorGrid(Gtk.Grid):
 		self.cursor_arrow = Gdk.Cursor(Gdk.CursorType.ARROW)
 		self.show_all()
 
-		total_height = self._parent.get_size_request()[0]
-		segment_height = total_height / self.grid_height
 		for i in range(0, self.grid_width):
-			button = _button(self, i, 0, 1, 20)
+			button = _button(self, i, 0, 1, 40)
 			self.attach(button, i, 0, button.width, button.height)
 			self.attach(_transparent_button(self), i, -1, 1, 1) 
+			self.attach(_transparent_button(self), i, self.grid_height, 1, 1) 
 		self.attach(_transparent_button(self), -1, 0, 1, self.grid_height) 
 
 	def on_button_press(self, widget, event):
@@ -147,14 +147,14 @@ class MyApp(Gtk.Window):
 		self.show_all()
 	
 	def on_motion(self, widget, event):
-		grid_height = self.mapping_editor.get_allocated_height()
-		grid_width = self.mapping_editor.get_allocated_width()
-		cell_height = grid_height / self.mapping_editor.grid_height
-		cell_width = grid_width / self.mapping_editor.grid_width
-		drag_widget = self.mapping_editor.drag_widget
-		mouse_x = self.get_pointer()[0]
-		mouse_y = self.get_pointer()[1]
 		if self.mapping_editor.dragging:
+			grid_height = self.mapping_editor.get_allocated_height()
+			grid_width = self.mapping_editor.get_allocated_width()
+			cell_height = grid_height / self.mapping_editor.grid_height
+			cell_width = grid_width / self.mapping_editor.grid_width
+			drag_widget = self.mapping_editor.drag_widget
+			mouse_x = self.get_pointer()[0]
+			mouse_y = self.get_pointer()[1]
 			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_bottom_resize):
 				new_height = round(mouse_y / cell_height) - drag_widget.y
 				if (new_height >= 1):
@@ -172,10 +172,22 @@ class MyApp(Gtk.Window):
 			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_draft):
 				height_displacement = round((mouse_y - self.mapping_editor.drag_start_y) / cell_height)
 				width_displacement = round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
-				if (drag_widget.x + width_displacement >= 0 and drag_widget.y + height_displacement >=0
-					and drag_widget.x + width_displacement < self.mapping_editor.grid_width and drag_widget.y + height_displacement + drag_widget.height <= self.mapping_editor.grid_height):
+				if (drag_widget.x + width_displacement < 0):
+					x = 0
+				else:
+					x = drag_widget.x + width_displacement 
+				if (drag_widget.y + height_displacement < 0):
+					y = 0
+				else:
+					y = drag_widget.y + height_displacement
+					if (y + drag_widget.height > self.mapping_editor.grid_height):
+						y = self.mapping_editor.grid_height - drag_widget.height
+				if ((drag_widget.y_temp != y or drag_widget.x_temp != x)
+				and (y + drag_widget.height <= self.mapping_editor.grid_height
+				or  x + drag_widget.width <= self.mapping_editor.grid_width)):
+					print("widget dragged: ", y + drag_widget.height)
 					self.mapping_editor.remove(drag_widget)
-					self.mapping_editor.attach(drag_widget, drag_widget.x + width_displacement, drag_widget.y + height_displacement, drag_widget.width, drag_widget.height)
+					self.mapping_editor.attach(drag_widget, x, y, drag_widget.width, drag_widget.height)
 					drag_widget.y_temp = drag_widget.y + height_displacement
 					drag_widget.x_temp = drag_widget.x + width_displacement
 
