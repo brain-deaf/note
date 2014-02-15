@@ -189,6 +189,8 @@ class MyApp(Gtk.Window):
 					x = 0
 				else:
 					x = drag_widget.x + width_displacement 
+					if (x + drag_widget.width > self.mapping_editor.grid_width):
+						x = self.mapping_editor.grid_width - drag_widget.width
 				if (drag_widget.y + height_displacement < 0):
 					y = 0
 				else:
