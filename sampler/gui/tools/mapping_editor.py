@@ -113,7 +113,6 @@ class SampleEditorGrid(Gtk.Grid):
 			self.attach(button, i, 0, button.width, button.height)
 			self.attach(_transparent_button(self), i, -1, 1, 1) 
 			self.attach(_transparent_button(self), i, self.grid_height, 1, 1) 
-		self.attach(_transparent_button(self), -1, 0, 1, self.grid_height) 
 
 	def on_button_press(self, widget, event):
 		if (self.get_property("window").get_cursor() != self.cursor_arrow):
@@ -157,18 +156,24 @@ class MyApp(Gtk.Window):
 			mouse_y = self.get_pointer()[1]
 			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_bottom_resize):
 				new_height = round(mouse_y / cell_height) - drag_widget.y
-				if (new_height >= 1):
+				if drag_widget.y + new_height > self.mapping_editor.grid_height:
+					new_height = self.mapping_editor.grid_height - drag_widget.height
+				if (new_height >= 1 and drag_widget.height != new_height):
+					print("bottom resize")
 					self.mapping_editor.remove(drag_widget)
 					self.mapping_editor.attach(drag_widget, drag_widget.x, drag_widget.y, drag_widget.width, new_height)
 					drag_widget.height = new_height
 			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_top_resize):
-				new_cell   = round(mouse_y / cell_height)
+				new_cell   = round(mouse_y / cell_height) - 1
+				if new_cell < 0:
+					new_cell = 0
 				new_height = round(drag_widget.height - (new_cell - drag_widget.y))
-				drag_widget.height = new_height
-				drag_widget.y = new_cell
-				if (new_height >= 1):
+				if (new_height >= 1 and new_height != drag_widget.height):
+					print("top resize")
 					self.mapping_editor.remove(drag_widget)
 					self.mapping_editor.attach(drag_widget, drag_widget.x, new_cell, drag_widget.width, new_height)
+					drag_widget.height = new_height
+					drag_widget.y = new_cell
 			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_draft):
 				height_displacement = round((mouse_y - self.mapping_editor.drag_start_y) / cell_height)
 				width_displacement = round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
