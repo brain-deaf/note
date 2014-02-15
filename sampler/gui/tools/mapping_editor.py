@@ -8,11 +8,19 @@ class _transparent_button(Gtk.Button):
 		self.set_property("hexpand", True)
 		self.set_property("opacity", 0)
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
+		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
 		self.connect('motion-notify-event', self.on_motion)
+		self.connect('button-release-event', self.on_button_release)
 	
 	def on_motion(self, widget, event):
 		if not self._parent.dragging:
 			self._parent.get_property("window").set_cursor(self._parent.cursor_arrow)
+	def on_button_release(self, widget, event):
+		if self._parent.dragging:
+			self._parent.get_property("window").set_cursor(self._parent.cursor_arrow)
+			self._parent.dragging = False
+			self._parent.drag_widget.y = self._parent.drag_widget.y_temp
+			self._parent.drag_widget.x = self._parent.drag_widget.x_temp
 
 class _button(Gtk.Button):
 	def __init__(self, parent, x, y, width=1, height=1):
