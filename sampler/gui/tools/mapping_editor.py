@@ -1,5 +1,6 @@
 from gi.repository import Gtk, Gdk
 import math
+import mapping_editor_grid
 
 class _transparent_button(Gtk.Button):
 	def __init__(self, parent):
@@ -96,15 +97,14 @@ class SampleEditorGrid(Gtk.Grid):
 
 		self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK) 
 
-
 		self.dragging = False
 		self.drag_start_y = 0
 		self.grid_height = 40
-		self.grid_width =20
+		self.grid_width = 20
 		self.drag_widget = None
 
 		self.set_property("row-homogeneous", True)
-		self.set_property("column-homogeneous", False)
+		self.set_property("column-homogeneous", True)
 
 		self.connect('button-press-event', self.on_button_press)
 
@@ -132,13 +132,12 @@ class SampleEditorGrid(Gtk.Grid):
 class MyApp(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self)
-		self.set_size_request(750, 400)
+		self.set_size_request(760, 400)
 		self.connect('delete-event', Gtk.main_quit)
 		self.mapping_editor = SampleEditorGrid(self)
-		self.add(self.mapping_editor)
 
 		cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
-		#self.get_property("window").set_cursor(cursor)
+		self.set_property("resizable", False)
 
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
 		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
@@ -151,6 +150,14 @@ class MyApp(Gtk.Window):
 		style_context = Gtk.StyleContext()
 		style_context.add_provider_for_screen(screen, css, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
+		self.grid_drawing = mapping_editor_grid.MappingEditorGrid(self.mapping_editor.grid_width, self.mapping_editor.grid_height)
+		self.overlay = Gtk.Overlay()
+		self.overlay.add(self.grid_drawing)
+		self.overlay.add_overlay(self.mapping_editor)
+		self.overlay.set_property("opacity", 0.9)
+		self.add(self.overlay)
+		self.overlay.show_all()
+
 		self.show_all()
 	
 	def on_motion(self, widget, event):
@@ -162,27 +169,25 @@ class MyApp(Gtk.Window):
 			drag_widget = self.mapping_editor.drag_widget
 			mouse_x = self.get_pointer()[0]
 			mouse_y = self.get_pointer()[1]
-			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_bottom_resize):
+			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_bottom_resize):
 				new_height = round(mouse_y / cell_height) - drag_widget.y
 				if drag_widget.y + new_height > self.mapping_editor.grid_height:
 					new_height = self.mapping_editor.grid_height - drag_widget.height
 				if (new_height >= 1 and drag_widget.height != new_height):
-					print("bottom resize")
 					self.mapping_editor.remove(drag_widget)
 					self.mapping_editor.attach(drag_widget, drag_widget.x, drag_widget.y, drag_widget.width, new_height)
 					drag_widget.height = new_height
-			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_top_resize):
+			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_top_resize):
 				new_cell   = round(mouse_y / cell_height) - 1
 				if new_cell < 0:
 					new_cell = 0
 				new_height = round(drag_widget.height - (new_cell - drag_widget.y))
 				if (new_height >= 1 and new_height != drag_widget.height):
-					print("top resize")
 					self.mapping_editor.remove(drag_widget)
 					self.mapping_editor.attach(drag_widget, drag_widget.x, new_cell, drag_widget.width, new_height)
 					drag_widget.height = new_height
 					drag_widget.y = new_cell
-			if (self.get_property("window").get_cursor() == self.mapping_editor.cursor_draft):
+			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_draft):
 				height_displacement = round((mouse_y - self.mapping_editor.drag_start_y) / cell_height)
 				width_displacement = round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
 				if (drag_widget.x + width_displacement < 0):
@@ -200,7 +205,7 @@ class MyApp(Gtk.Window):
 				if ((drag_widget.y_temp != y or drag_widget.x_temp != x)
 				and (y + drag_widget.height <= self.mapping_editor.grid_height
 				or  x + drag_widget.width <= self.mapping_editor.grid_width)):
-					print("widget dragged: ", y + drag_widget.height)
+					#print("widget dragged: ", y + drag_widget.height)
 					self.mapping_editor.remove(drag_widget)
 					self.mapping_editor.attach(drag_widget, x, y, drag_widget.width, drag_widget.height)
 					drag_widget.y_temp = y
