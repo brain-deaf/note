@@ -7,10 +7,10 @@ class MyApp(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self)
 		self.connect('delete-event', Gtk.main_quit)
-		self.cell_width = 20
-		self.cell_height = 14
-		self.grid_width = 10
-		self.grid_height = 10
+		self.cell_width = 60
+		self.cell_height = 40
+		self.grid_width = 15
+		self.grid_height = 15
 		self.mapping_editor = sample_editor_grid.SampleEditorGrid(self, self.grid_width, self.grid_height)
 		self.set_size_request((self.mapping_editor.grid_width + 2) * self.cell_width, (self.mapping_editor.grid_height + 2) * self.cell_height)
 
