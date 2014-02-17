@@ -1,140 +1,18 @@
 from gi.repository import Gtk, Gdk
 import math
 import mapping_editor_grid
-
-class _transparent_button(Gtk.Button):
-	def __init__(self, parent):
-		Gtk.Button.__init__(self)
-		self._parent = parent
-		self.set_property("hexpand", True)
-		self.set_property("opacity", 0)
-		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
-		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
-		self.connect('motion-notify-event', self.on_motion)
-		self.connect('button-release-event', self.on_button_release)
-	
-	def on_motion(self, widget, event):
-		if not self._parent.dragging:
-			self._parent.get_property("window").set_cursor(self._parent.cursor_arrow)
-	def on_button_release(self, widget, event):
-		if self._parent.dragging:
-			self._parent.get_property("window").set_cursor(self._parent.cursor_arrow)
-			self._parent.dragging = False
-			self._parent.drag_widget.y = self._parent.drag_widget.y_temp
-			self._parent.drag_widget.x = self._parent.drag_widget.x_temp
-
-class _button(Gtk.Button):
-	def __init__(self, parent, x, y, width=1, height=1):
-		Gtk.Button.__init__(self)
-		self._parent = parent
-		self.x = x
-		self.y = y
-		self.y_temp = 0
-		self.x_temp = 0
-		self.width = width
-		self.height = height
-
-		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
-		self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK) 
-		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
-		self.add_events(Gdk.EventMask.LEAVE_NOTIFY_MASK) 
-
-		self.set_property("hexpand", True)
-		self.set_property("opacity", 0.5)
-		self.zone_grid_height = self._parent.grid_height
-
-		
-		self.connect('button-press-event', parent.on_button_press)
-		self.connect('motion-notify-event', self.on_motion)
-		self.connect('leave-notify-event', self.on_leave)
-		self.connect('button-release-event', self.on_button_release)
-
-		self.resize_margin = 5 #px
-
-	def on_motion(self, widget, event):
-		width = widget.get_allocated_width()
-		height = widget.get_allocated_height()
-		grid_height = self._parent.get_allocated_height()
-		flag = True
-		
-		if (not self._parent.dragging):
-			if (width - event.x <= self.resize_margin):
-				self._parent.get_property("window").set_cursor(self._parent.cursor_right_resize)
-				flag = False
-
-			if (width - event.x >= width - self.resize_margin):
-				self._parent.get_property("window").set_cursor(self._parent.cursor_left_resize)
-				flag = False
-
-			if (height - event.y <= self.resize_margin):
-				self._parent.get_property("window").set_cursor(self._parent.cursor_bottom_resize)
-				flag = False
-
-			if (height - event.y >= height - self.resize_margin):
-				self._parent.get_property("window").set_cursor(self._parent.cursor_top_resize)
-				flag = False
-
-			if (self._parent.get_property("window").get_cursor() != self._parent.cursor_draft):
-				if flag:
-					self._parent.get_property("window").set_cursor(self._parent.cursor_draft)
-
-	def on_leave(self, widget, event):
-			if (self._parent.get_property("window").get_cursor() != self._parent.cursor_arrow and not self._parent.dragging):
-				self._parent.get_property("window").set_cursor(self._parent.cursor_arrow)
-
-	def on_button_release(self, widget, event):
-		if self._parent.dragging:
-			self._parent.dragging = False
-			if self._parent.get_property("window").get_cursor() == self._parent.cursor_draft:
-				self._parent.drag_widget.y = self._parent.drag_widget.y_temp
-				self._parent.drag_widget.x = self._parent.drag_widget.x_temp
-
-class SampleEditorGrid(Gtk.Grid):
-	def __init__(self, parent):
-		Gtk.Grid.__init__(self)
-
-		self._parent = parent
-
-		self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK) 
-
-		self.dragging = False
-		self.drag_start_y = 0
-		self.grid_height = 40
-		self.grid_width = 20
-		self.drag_widget = None
-
-		self.set_property("row-homogeneous", True)
-		self.set_property("column-homogeneous", True)
-
-		self.connect('button-press-event', self.on_button_press)
-
-		self.cursor_left_resize = Gdk.Cursor(Gdk.CursorType.LEFT_SIDE)
-		self.cursor_right_resize = Gdk.Cursor(Gdk.CursorType.RIGHT_SIDE)
-		self.cursor_top_resize = Gdk.Cursor(Gdk.CursorType.TOP_SIDE)
-		self.cursor_bottom_resize = Gdk.Cursor(Gdk.CursorType.BOTTOM_SIDE)
-		self.cursor_draft = Gdk.Cursor(Gdk.CursorType.DRAFT_LARGE)
-		self.cursor_arrow = Gdk.Cursor(Gdk.CursorType.ARROW)
-		self.show_all()
-
-		for i in range(0, self.grid_width):
-			button = _button(self, i, 0, 1, 40)
-			self.attach(button, i, 0, button.width, button.height)
-			self.attach(_transparent_button(self), i, -1, 1, 1) 
-			self.attach(_transparent_button(self), i, self.grid_height, 1, 1) 
-
-	def on_button_press(self, widget, event):
-		if (self.get_property("window").get_cursor() != self.cursor_arrow):
-			self.dragging = True
-			self.drag_widget = widget
-			self.drag_start_x = self._parent.get_pointer()[0]
-			self.drag_start_y = self._parent.get_pointer()[1]
+import sample_editor_grid
 
 class MyApp(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self)
-		self.set_size_request(760, 400)
 		self.connect('delete-event', Gtk.main_quit)
-		self.mapping_editor = SampleEditorGrid(self)
+		self.cell_width = 20
+		self.cell_height = 14
+		self.grid_width = 10
+		self.grid_height = 10
+		self.mapping_editor = sample_editor_grid.SampleEditorGrid(self, self.grid_width, self.grid_height)
+		self.set_size_request((self.mapping_editor.grid_width + 2) * self.cell_width, (self.mapping_editor.grid_height + 2) * self.cell_height)
 
 		cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
 		self.set_property("resizable", False)
@@ -150,7 +28,7 @@ class MyApp(Gtk.Window):
 		style_context = Gtk.StyleContext()
 		style_context.add_provider_for_screen(screen, css, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-		self.grid_drawing = mapping_editor_grid.MappingEditorGrid(self.mapping_editor.grid_width, self.mapping_editor.grid_height)
+		self.grid_drawing = mapping_editor_grid.MappingEditorGrid(self, self.mapping_editor.grid_width, self.mapping_editor.grid_height)
 		self.overlay = Gtk.Overlay()
 		self.overlay.add(self.grid_drawing)
 		self.overlay.add_overlay(self.mapping_editor)
@@ -159,13 +37,12 @@ class MyApp(Gtk.Window):
 		self.overlay.show_all()
 
 		self.show_all()
+		print("window height: ", self.get_allocated_height(), " grid height: ", self.mapping_editor.get_allocated_height())
 	
 	def on_motion(self, widget, event):
 		if self.mapping_editor.dragging:
-			grid_height = self.mapping_editor.get_allocated_height()
-			grid_width = self.mapping_editor.get_allocated_width()
-			cell_height = grid_height / self.mapping_editor.grid_height
-			cell_width = grid_width / self.mapping_editor.grid_width
+			cell_height = self.cell_height
+			cell_width = self.cell_width
 			drag_widget = self.mapping_editor.drag_widget
 			mouse_x = self.get_pointer()[0]
 			mouse_y = self.get_pointer()[1]
