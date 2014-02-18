@@ -1,5 +1,5 @@
 from gi.repository import Gtk
-from tools import select_box
+import select_box
 
 class MyWindow(Gtk.Window):
 

@@ -2,15 +2,20 @@ from gi.repository import Gtk, Gdk
 import math
 import mapping_editor_grid
 import sample_editor_grid
+import sample_description
 
 class MyApp(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self)
 		self.connect('delete-event', Gtk.main_quit)
-		self.cell_width = 60
-		self.cell_height = 40
+		self.cell_width = 24   #14 is the lowest GTK can handle
+		self.cell_height = 15  #12 is the lowest GTK can handle
 		self.grid_width = 15
 		self.grid_height = 15
+
+		self.box = Gtk.Box()
+		self.add(self.box)
+
 		self.mapping_editor = sample_editor_grid.SampleEditorGrid(self, self.grid_width, self.grid_height)
 		self.set_size_request((self.mapping_editor.grid_width + 2) * self.cell_width, (self.mapping_editor.grid_height + 2) * self.cell_height)
 
@@ -29,15 +34,17 @@ class MyApp(Gtk.Window):
 		style_context.add_provider_for_screen(screen, css, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
 		self.grid_drawing = mapping_editor_grid.MappingEditorGrid(self, self.mapping_editor.grid_width, self.mapping_editor.grid_height)
+		self.sample_description = sample_description.SampleDescription()
 		self.overlay = Gtk.Overlay()
+		self.box.pack_start(self.sample_description, True, True, 0)
+		self.box.pack_start(self.overlay, True, True, 0)
 		self.overlay.add(self.grid_drawing)
 		self.overlay.add_overlay(self.mapping_editor)
 		self.overlay.set_property("opacity", 0.9)
-		self.add(self.overlay)
 		self.overlay.show_all()
 
 		self.show_all()
-		print("window height: ", self.get_allocated_height(), " grid height: ", self.mapping_editor.get_allocated_height())
+		#print("window height: ", self.get_allocated_height(), " grid height: ", self.mapping_editor.get_allocated_height())
 	
 	def on_motion(self, widget, event):
 		if self.mapping_editor.dragging:
