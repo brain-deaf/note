@@ -23,15 +23,17 @@ class _transparent_button(Gtk.Button):
 			self._parent.drag_widget.x = self._parent.drag_widget.x_temp
 
 class _button(Gtk.Button):
-	def __init__(self, parent, x, y, width=1, height=1):
+	def __init__(self, parent, x, y, width=1, height=1, file_name="", path=""):
 		Gtk.Button.__init__(self)
 		self._parent = parent
 		self.x = x
 		self.y = y
-		self.y_temp = 0
-		self.x_temp = 0
+		self.y_temp = x
+		self.x_temp = y
 		self.width = width
 		self.height = height
+		self.file_name = file_name
+		self.path = path
 
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
 		self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK) 
@@ -114,7 +116,9 @@ class SampleEditorGrid(Gtk.Grid):
 		self.show_all()
 
 		for i in range(0, self.grid_width):
-			button = _button(self, i, 0, 1, self.grid_height)
+			name = "my_sample_" + str(i) + ".ogg"
+			path = "/home/my_path/" + name
+			button = _button(self, i, 0, 1, self.grid_height, name, path)
 			self.attach(button, i, 0, button.width, button.height)
 			self.attach(_transparent_button(self), i, -1, 1, 1) 
 			self.attach(_transparent_button(self), i, self.grid_height, 1, 1) 
@@ -125,7 +129,10 @@ class SampleEditorGrid(Gtk.Grid):
 		if (event.button == 3):
 			self.remove(widget)
 		if (self.get_property("window").get_cursor() != self.cursor_arrow and event.button != 3):
+			self._parent.sample_description.refresh_info(widget)
 			self.dragging = True
 			self.drag_widget = widget
 			self.drag_start_x = self._parent.get_pointer()[0]
 			self.drag_start_y = self._parent.get_pointer()[1]
+			widget.y_temp = widget.y
+			widget.x_temp = widget.x

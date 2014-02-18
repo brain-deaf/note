@@ -8,8 +8,8 @@ class MyApp(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self)
 		self.connect('delete-event', Gtk.main_quit)
-		self.cell_width = 24   #14 is the lowest GTK can handle
-		self.cell_height = 15  #12 is the lowest GTK can handle
+		self.cell_width = 44   #14 is the lowest GTK can handle
+		self.cell_height = 45  #12 is the lowest GTK can handle
 		self.grid_width = 15
 		self.grid_height = 15
 
@@ -48,6 +48,7 @@ class MyApp(Gtk.Window):
 	
 	def on_motion(self, widget, event):
 		if self.mapping_editor.dragging:
+			self.motion_trigger_flag = True
 			cell_height = self.cell_height
 			cell_width = self.cell_width
 			drag_widget = self.mapping_editor.drag_widget
