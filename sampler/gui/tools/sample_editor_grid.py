@@ -127,17 +127,14 @@ class SampleEditorGrid(Gtk.Grid):
 		self.cursor_bottom_resize = Gdk.Cursor(Gdk.CursorType.BOTTOM_SIDE)
 		self.cursor_draft = Gdk.Cursor(Gdk.CursorType.DRAFT_LARGE)
 		self.cursor_arrow = Gdk.Cursor(Gdk.CursorType.ARROW)
-		self.show_all()
 
 		for i in range(0, self.grid_width):
-			name = "my_sample_" + str(i) + ".ogg"
-			path = "/home/my_path/" + name
-			button = _button(self, i, 0, 1, self.grid_height, name, path)
-			self.attach(button, i, 0, button.width, button.height)
 			self.attach(_transparent_button(self), i, -1, 1, 1) 
 			self.attach(_transparent_button(self), i, self.grid_height, 1, 1) 
 			self.attach(_transparent_button(self), -1, i, 1, 1) 
 			self.attach(_transparent_button(self), self.grid_width, i, 1, 1) 
+
+		self.show_all()
 
 	def on_button_press(self, widget, event):
 		if (event.button == 3):
