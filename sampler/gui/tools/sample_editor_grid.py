@@ -107,6 +107,11 @@ class SampleEditorGrid(Gtk.Grid):
 		self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK) 
 		self.connect('button-press-event', self.on_button_press)
 
+		self.connect("drag-motion", self.motion_cb)
+		self.connect("drag-drop", self.drop_cb)
+		self.connect("drag-data-received", self.got_data_cb)
+		self.drag_dest_set(0, [], 0)
+
 		self.dragging = False
 		self.drag_start_y = 0
 		self.grid_height = height
@@ -145,3 +150,15 @@ class SampleEditorGrid(Gtk.Grid):
 			self.drag_start_y = self._parent.get_pointer()[1]
 			widget.y_temp = widget.y
 			widget.x_temp = widget.x	
+
+	def motion_cb(self, wid, context, x, y, time):
+		Gdk.drag_status(context,Gdk.DragAction.COPY, time)
+		return True
+
+	def drop_cb(self, wid, context, x, y, time):
+		wid.drag_get_data(context, context.list_targets()[-1], time)
+
+	def got_data_cb(self, wid, context, x, y, data, info, time):
+		files=data.get_text().rstrip('\n').split('\n')
+		print files
+		context.finish(True, False, time)
