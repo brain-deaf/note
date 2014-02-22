@@ -157,5 +157,8 @@ class SampleEditorGrid(Gtk.Grid):
 
 	def got_data_cb(self, wid, context, x, y, data, info, time):
 		files=data.get_text().rstrip('\n').split('\n')
-		print files
+		for i,v in enumerate(files):
+			button = _button(self, i, 0, 1, self.grid_height, v, v)
+			self.attach(button, button.x, button.y, button.width, self.grid_height) 
+		self.show_all()
 		context.finish(True, False, time)
