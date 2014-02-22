@@ -44,7 +44,6 @@ class MyApp(Gtk.Window):
 		self.overlay.show_all()
 
 		self.show_all()
-		#print("window height: ", self.get_allocated_height(), " grid height: ", self.mapping_editor.get_allocated_height())
 	
 	def on_motion(self, widget, event):
 		if self.mapping_editor.dragging:
@@ -54,6 +53,7 @@ class MyApp(Gtk.Window):
 			drag_widget = self.mapping_editor.drag_widget
 			mouse_x = self.get_pointer()[0]
 			mouse_y = self.get_pointer()[1]
+
 			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_bottom_resize):
 				new_height = round(mouse_y / cell_height) - drag_widget.y
 				if drag_widget.y + new_height > self.mapping_editor.grid_height:
@@ -62,6 +62,7 @@ class MyApp(Gtk.Window):
 					self.mapping_editor.remove(drag_widget)
 					self.mapping_editor.attach(drag_widget, drag_widget.x, drag_widget.y, drag_widget.width, new_height)
 					drag_widget.height = new_height
+
 			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_top_resize):
 				new_cell   = round(mouse_y / cell_height) - 1
 				if new_cell < 0:
@@ -72,6 +73,7 @@ class MyApp(Gtk.Window):
 					self.mapping_editor.attach(drag_widget, drag_widget.x, new_cell, drag_widget.width, new_height)
 					drag_widget.height = new_height
 					drag_widget.y = new_cell
+
 			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_draft):
 				height_displacement = round((mouse_y - self.mapping_editor.drag_start_y) / cell_height)
 				width_displacement = round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
@@ -90,17 +92,42 @@ class MyApp(Gtk.Window):
 				if ((drag_widget.y_temp != y or drag_widget.x_temp != x)
 				and (y + drag_widget.height <= self.mapping_editor.grid_height
 				or  x + drag_widget.width <= self.mapping_editor.grid_width)):
-					#print("widget dragged: ", y + drag_widget.height)
 					self.mapping_editor.remove(drag_widget)
 					self.mapping_editor.attach(drag_widget, x, y, drag_widget.width, drag_widget.height)
 					drag_widget.y_temp = y
 					drag_widget.x_temp = x
 
+			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_right_resize):
+				width_displacement = round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
+				if (width_displacement + drag_widget.x + drag_widget.width <= self.mapping_editor.grid_width
+				and drag_widget.width + width_displacement != drag_widget.width_temp): 
+					self.mapping_editor.remove(drag_widget)
+					self.mapping_editor.attach(drag_widget, drag_widget.x, drag_widget.y, drag_widget.width + width_displacement, drag_widget.height)
+					drag_widget.width_temp = drag_widget.width + width_displacement
+
+			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_left_resize):
+				new_cell = drag_widget.x + round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
+				if new_cell < 0:
+					new_cell = 0
+				new_width = round(drag_widget.width + (drag_widget.x - new_cell))
+				if (new_width >= 1 and new_width != drag_widget.width):
+					self.mapping_editor.remove(drag_widget)
+					self.mapping_editor.attach(drag_widget, new_cell, drag_widget.y, new_width, drag_widget.height)
+					drag_widget.width_temp = new_width
+					drag_widget.x_temp = new_cell
+					
+
 	def on_button_release(self, widget, event):
+		print("button release window level")
 		if self.mapping_editor.dragging:
 			self.mapping_editor.dragging = False
-			if self.get_property("window").get_cursor() == self.mapping_editor.cursor_draft:
+			if self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_draft:
 				self.mapping_editor.drag_widget.y = self.mapping_editor.drag_widget.y_temp
+				self.mapping_editor.drag_widget.x = self.mapping_editor.drag_widget.x_temp
+			if self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_right_resize:
+				self.mapping_editor.drag_widget.width = self.mapping_editor.drag_widget.width_temp
+			if self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_left_resize:
+				self.mapping_editor.drag_widget.width = self.mapping_editor.drag_widget.width_temp
 				self.mapping_editor.drag_widget.x = self.mapping_editor.drag_widget.x_temp
 
 app = MyApp()

@@ -21,6 +21,7 @@ class _transparent_button(Gtk.Button):
 			self._parent.dragging = False
 			self._parent.drag_widget.y = self._parent.drag_widget.y_temp
 			self._parent.drag_widget.x = self._parent.drag_widget.x_temp
+			self._parent.drag_widget.width = self._parent.drag_widget.width_temp
 
 class _button(Gtk.Button):
 	def __init__(self, parent, x, y, width=1, height=1, file_name="", path=""):
@@ -31,6 +32,7 @@ class _button(Gtk.Button):
 		self.y_temp = x
 		self.x_temp = y
 		self.width = width
+		self.width_temp = width
 		self.height = height
 		self.file_name = file_name
 		self.path = path
@@ -89,6 +91,13 @@ class _button(Gtk.Button):
 			if self._parent.get_property("window").get_cursor() == self._parent.cursor_draft:
 				self._parent.drag_widget.y = self._parent.drag_widget.y_temp
 				self._parent.drag_widget.x = self._parent.drag_widget.x_temp
+			if self.get_property("window").get_cursor() == self._parent.cursor_right_resize:
+				self._parent.drag_widget.width = self._parent.drag_widget.width_temp
+			if self.get_property("window").get_cursor() == self._parent.cursor_left_resize:
+				self._parent.drag_widget.width = self._parent.drag_widget.width_temp
+				self._parent.drag_widget.x = self._parent.drag_widget.x_temp
+
+
 
 class SampleEditorGrid(Gtk.Grid):
 	def __init__(self, parent, width, height):
@@ -135,4 +144,4 @@ class SampleEditorGrid(Gtk.Grid):
 			self.drag_start_x = self._parent.get_pointer()[0]
 			self.drag_start_y = self._parent.get_pointer()[1]
 			widget.y_temp = widget.y
-			widget.x_temp = widget.x
+			widget.x_temp = widget.x	
