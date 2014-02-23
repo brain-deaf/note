@@ -8,10 +8,10 @@ class MyApp(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self)
 		self.connect('delete-event', Gtk.main_quit)
-		self.cell_width = 44   #14 is the lowest GTK can handle
-		self.cell_height = 45  #12 is the lowest GTK can handle
-		self.grid_width = 15
-		self.grid_height = 15
+		self.cell_width = 14   #14 is the lowest GTK can handle
+		self.cell_height = 13  #13 is the lowest GTK can handle
+		self.grid_width = 80
+		self.grid_height = 40
 
 		self.box = Gtk.Box()
 		self.add(self.box)
