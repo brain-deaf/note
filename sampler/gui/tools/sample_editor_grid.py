@@ -6,6 +6,7 @@ class _transparent_button(Gtk.Button):
 		Gtk.Button.__init__(self)
 		self._parent = parent
 		self.set_property("hexpand", True)
+		self.set_property("vexpand", True)
 		self.set_property("opacity", 0)
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
 		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
@@ -129,11 +130,19 @@ class SampleEditorGrid(Gtk.Grid):
 		self.cursor_draft = Gdk.Cursor(Gdk.CursorType.DRAFT_LARGE)
 		self.cursor_arrow = Gdk.Cursor(Gdk.CursorType.ARROW)
 
+		'''
 		for i in range(0, self.grid_width):
 			self.attach(_transparent_button(self), i, -1, 1, 1) 
+			self.attach(_transparent_button(self), self.grid_width, i, 1, 1) 
+
+		for i in range(0, self.grid_height):
 			self.attach(_transparent_button(self), i, self.grid_height, 1, 1) 
 			self.attach(_transparent_button(self), -1, i, 1, 1) 
-			self.attach(_transparent_button(self), self.grid_width, i, 1, 1) 
+		'''
+		self.attach(_transparent_button(self), -1, 0, 1, self.grid_height)
+		self.attach(_transparent_button(self), -1, -1, self.grid_width + 1, 1)
+		self.attach(_transparent_button(self), self.grid_width + 1, -1, 1, self.grid_height + 1)
+		self.attach(_transparent_button(self), -1, self.grid_height + 1, self.grid_width + 2, 1)
 
 		self.show_all()
 
