@@ -117,6 +117,7 @@ class SampleEditorGrid(Gtk.Grid):
 		self.grid_height = height
 		self.grid_width = width
 		self.drag_widget = None
+		self.drag_drop_x = self._parent.cell_width
 
 		self.set_property("row-homogeneous", True)
 		self.set_property("column-homogeneous", True)
@@ -149,6 +150,12 @@ class SampleEditorGrid(Gtk.Grid):
 			widget.x_temp = widget.x	
 
 	def motion_cb(self, wid, context, x, y, time):
+		if (x < self._parent.cell_width):
+			self.drag_drop_x = self._parent.cell_width
+		elif self.drag_drop_x > self._parent.cell_width * self.grid_width:
+			self.drag_drop_x = self._parent.cell_width * self.grid_width
+		else:
+			self.drag_drop_x = x
 		Gdk.drag_status(context,Gdk.DragAction.COPY, time)
 		return True
 
@@ -158,7 +165,7 @@ class SampleEditorGrid(Gtk.Grid):
 	def got_data_cb(self, wid, context, x, y, data, info, time):
 		files=data.get_text().rstrip('\n').split('\n')
 		for i,v in enumerate(files):
-			button = _button(self, i, 0, 1, self.grid_height, v, v)
+			button = _button(self, (i - 1) + (self.drag_drop_x / self._parent.cell_width), 0, 1, self.grid_height, v, v)
 			self.attach(button, button.x, button.y, button.width, self.grid_height) 
 		self.show_all()
 		context.finish(True, False, time)
