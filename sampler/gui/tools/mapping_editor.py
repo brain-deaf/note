@@ -10,17 +10,19 @@ class MyApp(Gtk.Window):
 		self.connect('delete-event', Gtk.main_quit)
 		self.cell_width = 14   #14 is the lowest GTK can handle
 		self.cell_height = 13  #13 is the lowest GTK can handle
-		self.grid_width = 80
+		self.grid_width = 128
 		self.grid_height = 40
 
-		self.box = Gtk.Box()
-		self.add(self.box)
+		self.pane_view   = Gtk.Paned()
+		self.add(self.pane_view)
+		self.scroll_view = Gtk.ScrolledWindow()
 
 		self.mapping_editor = sample_editor_grid.SampleEditorGrid(self, self.grid_width, self.grid_height)
-		self.set_size_request((self.mapping_editor.grid_width + 2) * self.cell_width, (self.mapping_editor.grid_height + 2) * self.cell_height)
+		#self.set_size_request((self.mapping_editor.grid_width + 2) * self.cell_width, (self.mapping_editor.grid_height + 2) * self.cell_height)
+		self.set_size_request(1000, 700)
 
 		cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
-		self.set_property("resizable", False)
+		#self.set_property("resizable", False)
 
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
 		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
@@ -35,9 +37,12 @@ class MyApp(Gtk.Window):
 
 		self.grid_drawing = mapping_editor_grid.MappingEditorGrid(self, self.mapping_editor.grid_width, self.mapping_editor.grid_height)
 		self.sample_description = sample_description.SampleDescription()
+
 		self.overlay = Gtk.Overlay()
-		self.box.pack_start(self.sample_description, True, True, 0)
-		self.box.pack_start(self.overlay, True, True, 0)
+		self.pane_view.pack1(self.sample_description)
+		self.pane_view.pack2(self.scroll_view)
+		self.pane_view.show_all()
+		self.scroll_view.add(self.overlay)
 		self.overlay.add(self.grid_drawing)
 		self.overlay.add_overlay(self.mapping_editor)
 		self.overlay.set_property("opacity", 0.9)
