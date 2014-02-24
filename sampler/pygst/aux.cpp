@@ -2,7 +2,7 @@
 #include "midi.h"
 
 
-void MidiInput::mycallback( double deltatime, std::vector< unsigned char > *message, void *userData ){
+/*void MidiInput::mycallback( double deltatime, std::vector< unsigned char > *message, void *userData ){
   unsigned int nBytes = message->size();
   int byte;
   int value;
@@ -19,17 +19,19 @@ void MidiInput::mycallback( double deltatime, std::vector< unsigned char > *mess
   }
   if ( nBytes > 0 )
     std::cout << "stamp = " << deltatime << std::endl;
-}
+}*/
 
-int MidiInput::midi_listen(void* player){
+int MidiInput::midi_listen(cb user_function, void* userdata){
   RtMidiIn *midiin = new RtMidiIn();
   unsigned int nPorts = midiin->getPortCount();
-  if ( nPorts == 0 ) {
+
+  if ( nPorts == 1 ) {
     std::cout << "No ports available!\n";
-    goto cleanup;
+	goto cleanup;
   }
-  midiin->openPort( 1 );
-  midiin->setCallback( &mycallback, player );
+
+  midiin->openPort(1);
+  midiin->setCallback(user_function, userdata);
   midiin->ignoreTypes( false, false, false );
 
   std::cout << "\nReading MIDI input ... press <enter> to quit.\n";
@@ -228,7 +230,7 @@ void Player::print_gst_version() {
     }
 }*/
 
-void Player::listen(){
+/*void Player::listen(){
     midi_in->midi_listen(this);
     return;
-}
+}*/

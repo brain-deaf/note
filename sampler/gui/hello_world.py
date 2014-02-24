@@ -43,6 +43,7 @@ class MyWindow(Gtk.Window):
         self.track_2.set_properties(orientation=1, inverted=True)
         self.track_2.connect("value-changed", self.on_slider_changed)
         self.grid.attach_next_to(self.track_2, self.button2, Gtk.PositionType.RIGHT, 1, 2)
+        self.midi = player.MidiListen()
         
     def run_main(self):
         self.player.run()
@@ -57,18 +58,19 @@ class MyWindow(Gtk.Window):
         value = slider.get_value()
         if (slider == self.master_slider):
             self.player.set_volume(value)
-            print "set master volume"
         if (slider == self.track_1):
             self.player.set_volume_track1(value)
-            print "set track1 volume"
         if (slider == self.track_2):
             self.player.set_volume_track2(value)
-            print "set track2 volume"
+
+def test():
+	print("hello, world!")
 
 win = MyWindow()
-thread = threading.Thread(target=win.player.get_midi_in)
+thread = threading.Thread(target=win.midi.start_midi(test))
 thread.daemon = True
 thread.start()
+print("thread started")
 
 win.connect("delete-event", win.close_app)
 win.show_all()

@@ -3,6 +3,7 @@ import math
 import mapping_editor_grid
 import sample_editor_grid
 import sample_description
+import player
 
 class MyApp(Gtk.Window):
 	def __init__(self):

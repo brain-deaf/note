@@ -35,12 +35,10 @@ public:
     void _d_Player();
     void start_main();
     void print_gst_version();
-    //void play(char* track_name);
     void play_sample(char* sample_name);
     void set_volume(double _volume);
     void set_volume_track1(double _volume);
     void set_volume_track2(double _volume);
-    void listen();
 };
 
 #endif //player_h
