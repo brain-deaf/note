@@ -43,7 +43,6 @@ class MyWindow(Gtk.Window):
         self.track_2.set_properties(orientation=1, inverted=True)
         self.track_2.connect("value-changed", self.on_slider_changed)
         self.grid.attach_next_to(self.track_2, self.button2, Gtk.PositionType.RIGHT, 1, 2)
-        self.midi = player.MidiListen()
         
     def run_main(self):
         self.player.run()
@@ -67,10 +66,9 @@ def test():
 	print("hello, world!")
 
 win = MyWindow()
-thread = threading.Thread(target=win.midi.start_midi(test))
+thread = threading.Thread(target=win.player.get_midi_in, args=(test,))
 thread.daemon = True
 thread.start()
-print("thread started")
 
 win.connect("delete-event", win.close_app)
 win.show_all()
