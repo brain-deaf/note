@@ -40,8 +40,6 @@ public:
     void set_volume_track1(double _volume);
     void set_volume_track2(double _volume);
     void listen(void(*)(double, std::vector<unsigned char>* message, void* userdata), void* userdata);
-    void listen2(void* userdata);
-    void listen3();
 };
 
 #endif //player_h

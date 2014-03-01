@@ -11,8 +11,6 @@ cdef extern from "player.h":
         void set_volume_track1(double _volume)
         void set_volume_track2(double _volume)
         void listen(void(*f)(double, vector[unsigned char]*, void*), void* userdata) nogil
-        void listen2(void* userdata) nogil
-        void listen3() nogil
 
 cdef extern from "midi.h":
     cdef cppclass MidiInput:
@@ -24,17 +22,8 @@ cdef void midi_init(Player* ob, void* function) nogil:
     with nogil:
         ob.listen(callback, function)
 
-cdef void midi_init2(Player* ob) nogil:
-    with nogil:
-        ob.listen2(ob)
-
-cdef void midi_init3(Player* ob) nogil:
-    with nogil:
-        ob.listen3()
-
 cdef void callback(double deltatime, vector[unsigned char]* message, void* userdata) with gil:
-        #(<object>userdata)()	
-    print("hello, world!")
+    (<object>userdata)(message[0])	
 
 cdef class MidiListen:
     cdef MidiInput* thisptr
@@ -61,7 +50,3 @@ cdef class PyPlayer:
         self.thisptr.set_volume_track2(_volume)
     def get_midi_in(self, f):
         midi_init(self.thisptr, <void*>f)
-    def get_midi_in2(self):
-        midi_init2(self.thisptr)
-    def get_midi_in3(self):
-        midi_init3(self.thisptr)

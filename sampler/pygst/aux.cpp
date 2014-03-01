@@ -30,28 +30,6 @@ int MidiInput::midi_listen(cb user_function, void* userdata){
   }
   midiin->openPort( 1 );
   midiin->setCallback( user_function, userdata );
-  //midiin->setCallback( &mycallback, userdata );
-  midiin->ignoreTypes( false, false, false );
-
-  std::cout << "\nReading MIDI input ... press <enter> to quit.\n";
-  char input;
-  std::cin.get(input);
-
- cleanup:
-  delete midiin;
-
-  return 0;
-}
-
-int MidiInput::midi_listen2(void* userdata){
-  RtMidiIn *midiin = new RtMidiIn();
-  unsigned int nPorts = midiin->getPortCount();
-  if ( nPorts == 0 ) {
-    std::cout << "No ports available!\n";
-    goto cleanup;
-  }
-  midiin->openPort( 1 );
-  midiin->setCallback( &mycallback, userdata );
   midiin->ignoreTypes( false, false, false );
 
   std::cout << "\nReading MIDI input ... press <enter> to quit.\n";
@@ -258,32 +236,4 @@ void Player::listen(cb user_function, void* userdata){
 
   return ;
     return;
-}
-
-void Player::listen2(void* userdata){
-    //midi_in->midi_listen(user_function, userdata);
-  RtMidiIn *midiin = new RtMidiIn();
-  unsigned int nPorts = midiin->getPortCount();
-  if ( nPorts == 0 ) {
-    std::cout << "No ports available!\n";
-    goto cleanup;
-  }
-  midiin->openPort( 1 );
-  midiin->setCallback( &MidiInput::mycallback, userdata );
-  midiin->ignoreTypes( false, false, false );
-
-  std::cout << "\nReading MIDI input ... press <enter> to quit.\n";
-  char input;
-  std::cin.get(input);
-
- cleanup:
-  delete midiin;
-
-  return ;
-    return;
-}
-
-void Player::listen3(){
-  midi_in->midi_listen2(this);
-  return;
 }

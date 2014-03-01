@@ -4,6 +4,7 @@ import mapping_editor_grid
 import sample_editor_grid
 import sample_description
 import player
+import threading
 
 class MyApp(Gtk.Window):
 	def __init__(self):
@@ -19,11 +20,11 @@ class MyApp(Gtk.Window):
 		self.scroll_view = Gtk.ScrolledWindow()
 
 		self.mapping_editor = sample_editor_grid.SampleEditorGrid(self, self.grid_width, self.grid_height)
-		#self.set_size_request((self.mapping_editor.grid_width + 2) * self.cell_width, (self.mapping_editor.grid_height + 2) * self.cell_height)
 		self.set_size_request(1000, 700)
 
 		cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
-		#self.set_property("resizable", False)
+
+		self.player = player.PyPlayer()
 
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
 		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
@@ -37,6 +38,8 @@ class MyApp(Gtk.Window):
 		style_context.add_provider_for_screen(screen, css, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
 		self.grid_drawing = mapping_editor_grid.MappingEditorGrid(self, self.mapping_editor.grid_width, self.mapping_editor.grid_height)
+		self.grid_overlay = mapping_editor_grid.MappingOverlay(self, self.mapping_editor.grid_width, self.mapping_editor.grid_height)
+
 		self.sample_description = sample_description.SampleDescription()
 
 		self.overlay = Gtk.Overlay()
@@ -44,9 +47,15 @@ class MyApp(Gtk.Window):
 		self.pane_view.pack2(self.scroll_view)
 		self.pane_view.show_all()
 		self.scroll_view.add(self.overlay)
-		self.overlay.add(self.grid_drawing)
+
+		self.overlay2 = Gtk.Overlay()
+		self.overlay2.add(self.grid_drawing)
+		self.overlay2.add_overlay(self.grid_overlay)
+
+		self.overlay.add(self.overlay2)
 		self.overlay.add_overlay(self.mapping_editor)
 		self.overlay.set_property("opacity", 0.9)
+		self.overlay2.set_property("opacity", 0.9)
 		self.overlay.show_all()
 
 		self.show_all()
@@ -124,7 +133,6 @@ class MyApp(Gtk.Window):
 					
 
 	def on_button_release(self, widget, event):
-		print("button release window level")
 		if self.mapping_editor.dragging:
 			self.mapping_editor.dragging = False
 			if self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_draft:
@@ -136,6 +144,16 @@ class MyApp(Gtk.Window):
 				self.mapping_editor.drag_widget.width = self.mapping_editor.drag_widget.width_temp
 				self.mapping_editor.drag_widget.x = self.mapping_editor.drag_widget.x_temp
 
-app = MyApp()
+def midi_received(data):
+	global win
+	note = data[1]
+	print(note)
+	win.grid_overlay.draw_midi_note(note)
+
+win = MyApp()
+thread = threading.Thread(target=win.player.get_midi_in, args=(midi_received,))
+thread.daemon = True
+thread.start()
+
 Gtk.main()
 
