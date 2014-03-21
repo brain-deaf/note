@@ -10,10 +10,10 @@ class MyApp(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self)
 		self.connect('delete-event', Gtk.main_quit)
-		self.cell_width = 14   #14 is the lowest GTK can handle
+		self.cell_width  = 14   #14 is the lowest GTK can handle
 		self.cell_height = 13  #13 is the lowest GTK can handle
-		self.grid_width = 128
-		self.grid_height = 40
+		self.grid_width  = 127
+		self.grid_height = 127
 
 		self.pane_view   = Gtk.Paned()
 		self.add(self.pane_view)
@@ -46,7 +46,6 @@ class MyApp(Gtk.Window):
 		self.pane_view.pack1(self.sample_description)
 		self.pane_view.pack2(self.scroll_view)
 		self.pane_view.show_all()
-		self.scroll_view.add(self.overlay)
 
 		self.overlay2 = Gtk.Overlay()
 		self.overlay2.add(self.grid_drawing)
@@ -54,8 +53,24 @@ class MyApp(Gtk.Window):
 
 		self.overlay.add(self.overlay2)
 		self.overlay.add_overlay(self.mapping_editor)
+
+		self.scroll_view.add(self.overlay)
+
+		#self.overlay.add(self.grid_drawing)
+
+		width  = self.grid_drawing.width
+		height = self.grid_drawing.height
+
 		self.overlay.set_property("opacity", 0.9)
+		self.overlay.set_property("halign", Gtk.Align.START)
+		self.overlay.set_property("valign", Gtk.Align.START)
+		self.overlay.set_size_request(width, height)
+
 		self.overlay2.set_property("opacity", 0.9)
+		self.overlay2.set_property("halign", Gtk.Align.START)
+		self.overlay2.set_property("valign", Gtk.Align.START)
+		self.overlay2.set_size_request(width, height)
+
 		self.overlay.show_all()
 
 		self.show_all()
@@ -138,17 +153,23 @@ class MyApp(Gtk.Window):
 			if self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_draft:
 				self.mapping_editor.drag_widget.y = self.mapping_editor.drag_widget.y_temp
 				self.mapping_editor.drag_widget.x = self.mapping_editor.drag_widget.x_temp
-			if self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_right_resize:
+			if  self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_right_resize:
 				self.mapping_editor.drag_widget.width = self.mapping_editor.drag_widget.width_temp
-			if self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_left_resize:
+			if  self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_left_resize:
 				self.mapping_editor.drag_widget.width = self.mapping_editor.drag_widget.width_temp
 				self.mapping_editor.drag_widget.x = self.mapping_editor.drag_widget.x_temp
 
+RELEASE = 128
+NOTE_ON = 144
 def midi_received(data):
 	global win
-	note = data[1]
-	print(note)
-	win.grid_overlay.draw_midi_note(note)
+	note     = data[1]
+	velocity = data[2]
+	if   data[0] == NOTE_ON:
+		win.grid_overlay.draw_midi_note((note, velocity))
+		print(data)
+	elif data[0] == RELEASE:
+		win.grid_overlay.draw_release_midi_note((note, velocity))
 
 win = MyApp()
 thread = threading.Thread(target=win.player.get_midi_in, args=(midi_received,))

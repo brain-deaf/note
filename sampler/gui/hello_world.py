@@ -62,11 +62,12 @@ class MyWindow(Gtk.Window):
         if (slider == self.track_2):
             self.player.set_volume_track2(value)
 
-def test():
-	print("hello, world!")
+def midi_received(data):
+	note = data[1]
+	print(note)
 
 win = MyWindow()
-thread = threading.Thread(target=win.player.get_midi_in, args=(test,))
+thread = threading.Thread(target=win.player.get_midi_in, args=(midi_received,))
 thread.daemon = True
 thread.start()
 
