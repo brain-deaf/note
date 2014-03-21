@@ -172,9 +172,9 @@ def midi_received(data):
 		win.grid_overlay.draw_release_midi_note((note, velocity))
 
 win = MyApp()
-thread = threading.Thread(target=win.player.get_midi_in, args=(midi_received,))
-thread.daemon = True
-thread.start()
+#thread = threading.Thread(target=win.player.get_midi_in, args=(midi_received,))
+#thread.daemon = True
+#thread.start()
 
 Gtk.main()
 

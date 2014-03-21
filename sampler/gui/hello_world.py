@@ -47,9 +47,9 @@ class MyWindow(Gtk.Window):
     def run_main(self):
         self.player.run()
     def on_button1_clicked(self, widget):
-        self.player.play_sample("test.ogg")
+        self.player.play_sample(bytes("test.ogg","ascii"))
     def on_button2_clicked(self, widget):
-        self.player.play_sample("test2.ogg")
+        self.player.play_sample(bytes("test2.ogg","ascii"))
     def close_app(self, _,__):
         self.player.destruct()
         Gtk.main_quit()

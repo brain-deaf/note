@@ -1,4 +1,5 @@
 # vim: syntax=python
 SConscript('pygst/SConscript')
 env=DefaultEnvironment()
-env.Install('gui','pygst/player.so')
+env.Install('gui','pygst/player.so') #MESSY
+env.Install('gui/tools','pygst/player.so') #GROSS

@@ -1,6 +1,5 @@
-from gi.repository import Gtk, Gdk
-import cairo
-import math
+from gi.repository import Gtk
+from math import floor
 
 class MappingEditorGrid(Gtk.DrawingArea):
 	def __init__(self, parent, grid_width, grid_height):
@@ -8,12 +7,12 @@ class MappingEditorGrid(Gtk.DrawingArea):
 		self.set_valign(Gtk.Align.START)
 		self.set_halign(Gtk.Align.START)
 		self._parent = parent
-		self.width   = (self._parent.mapping_editor.grid_width + 2) * self._parent.cell_width
-		self.height  = (self._parent.mapping_editor.grid_height + 2) * self._parent.cell_height
+		self.width   = (grid_width + 2) * self._parent.cell_width
+		self.height  = (grid_height + 2) * self._parent.cell_height
 		self.set_size_request(self.width, self.height)
 
-		self.grid_width  = self._parent.mapping_editor.grid_width + 1
-		self.grid_height = self._parent.mapping_editor.grid_height + 1
+		self.grid_width  = grid_width + 1
+		self.grid_height = grid_height + 1
 		self.cell_width  = self._parent.cell_width
 		self.cell_height = self._parent.cell_height
 	
@@ -45,14 +44,14 @@ class MappingOverlay(Gtk.DrawingArea):
 		self.set_valign(Gtk.Align.START)
 		self.set_halign(Gtk.Align.START)
 		self._parent = parent
-		self.width   = (self._parent.mapping_editor.grid_width + 2) * self._parent.cell_width
-		self.height  = (self._parent.mapping_editor.grid_height + 2) * self._parent.cell_height
+		self.width   = (grid_width + 2) * self._parent.cell_width
+		self.height  = (grid_height + 2) * self._parent.cell_height
 		self.set_size_request(self.width, self.height)
 
 		self.set_property("opacity", 0.5)
 
-		self.grid_width  = self._parent.mapping_editor.grid_width + 1
-		self.grid_height = self._parent.mapping_editor.grid_height + 1
+		self.grid_width  = grid_width + 1
+		self.grid_height = grid_height + 1
 		self.cell_width  = self._parent.cell_width
 		self.cell_height = self._parent.cell_height
 
@@ -77,8 +76,8 @@ class MappingOverlay(Gtk.DrawingArea):
 		for n in self.notes:
 			note     = n[0] + 1
 			velocity = n[1]
-			cc.move_to(math.floor(note * self.cell_width + self.cell_width/2), self.cell_height * (128 - velocity))
-			cc.line_to(math.floor(note * self.cell_width + self.cell_width/2), self.cell_height * (128 - (velocity - 1)))
+			cc.move_to(floor(note * self.cell_width + self.cell_width/2), self.cell_height * (128 - velocity))
+			cc.line_to(floor(note * self.cell_width + self.cell_width/2), self.cell_height * (128 - (velocity - 1)))
 		cc.stroke()
 
 
