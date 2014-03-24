@@ -22,9 +22,10 @@ env.MergeFlags([
 
 def cythonPseudoBuilder(env,source):
     cppCode = env.Py2C(source)
-    o=env.SharedObject('aux.cpp')
-    env.SharedLibrary(source,[o,cppCode],LIBPREFIX='')
+    m=env.SharedObject('midi.cpp')
+    p=env.SharedObject('player.cpp')
+    env.SharedLibrary(source,[m,p,cppCode],LIBPREFIX='')
 
 env.AddMethod(cythonPseudoBuilder,'Cython')
-c=env.Cython('player')
+c=env.Cython('pyplayer')
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from gi.repository import Gtk
-import player
+import pyplayer
 import threading
 
 class MyWindow(Gtk.Window):
@@ -28,7 +28,7 @@ class MyWindow(Gtk.Window):
         self.master_slider.set_properties(orientation=0, inverted=False)
         self.master_slider.connect("value-changed", self.on_slider_changed)
         self.grid.attach_next_to(self.master_slider, self.button1, Gtk.PositionType.TOP, 7, 1)
-        self.player = player.PyPlayer()
+        self.player = pyplayer.PyPlayer()
         
         self.track_1 = Gtk.Scale()
         self.track_1.set_properties(expand=True)
@@ -47,9 +47,9 @@ class MyWindow(Gtk.Window):
     def run_main(self):
         self.player.run()
     def on_button1_clicked(self, widget):
-        self.player.play_sample("test.ogg")
+        self.player.play_sample(b"test.ogg")
     def on_button2_clicked(self, widget):
-        self.player.play_sample("test2.ogg")
+        self.player.play_sample(b"test2.ogg")
     def close_app(self, _,__):
         self.player.destruct()
         Gtk.main_quit()

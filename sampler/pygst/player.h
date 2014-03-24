@@ -32,9 +32,8 @@ public:
     MidiInput* midi_in;
 
     Player();
-    void _d_Player();
+    ~Player();
     void start_main();
-    void print_gst_version();
     void play_sample(char* sample_name);
     void set_volume(double _volume);
     void set_volume_track1(double _volume);

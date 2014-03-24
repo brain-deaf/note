@@ -2,46 +2,6 @@
 #include "midi.h"
 
 
-void MidiInput::mycallback( double deltatime, std::vector< unsigned char > *message, void *userData ){
-  unsigned int nBytes = message->size();
-  int byte;
-  int value;
-  Player* my_player = (Player*)userData;
-
-  for ( unsigned int i=0; i<nBytes; i++ ){
-     byte = i;
-     value = (int)message->at(i);
-     std::cout << "Byte " << byte << " = " << value << ", ";
-     if (byte == 0 && value == 144){
-         my_player->play_sample("test.ogg");
-     }
-         
-  }
-  if ( nBytes > 0 )
-    std::cout << "stamp = " << deltatime << std::endl;
-}
-
-int MidiInput::midi_listen(cb user_function, void* userdata){
-  RtMidiIn *midiin = new RtMidiIn();
-  unsigned int nPorts = midiin->getPortCount();
-  if ( nPorts == 0 ) {
-    std::cout << "No ports available!\n";
-    goto cleanup;
-  }
-  midiin->openPort( 1 );
-  midiin->setCallback( user_function, userdata );
-  midiin->ignoreTypes( false, false, false );
-
-  std::cout << "\nReading MIDI input ... press <enter> to quit.\n";
-  char input;
-  std::cin.get(input);
-
- cleanup:
-  delete midiin;
-
-  return 0;
-}
-
 static gboolean bus_call(GstBus* bus, GstMessage* msg, gpointer data){
     Player* my_player = (Player*) data;
     switch (GST_MESSAGE_TYPE (msg)) {
@@ -127,7 +87,7 @@ Player::Player(){
     midi_in = new MidiInput();
 }
 
-void Player::_d_Player(){
+Player::~Player(){
     g_print("destructor\n");
     gst_element_set_state(pipeline, GST_STATE_NULL);
     if (pipeline != NULL){
@@ -196,21 +156,6 @@ void Player::set_volume_track1(double _volume){
 void Player::set_volume_track2(double _volume){
     volume_track2 = _volume;
     if (vol_track2 != NULL) g_object_set(G_OBJECT(vol_track2), "volume", _volume, NULL);
-    return;
-}
-
-void Player::print_gst_version() {
-    const gchar *nano_str;
-    guint major, minor, micro, nano;
-    gst_version (&major, &minor, &micro, &nano);
-    if (nano == 1)
-        nano_str = "(CVS)";
-   else if (nano == 2)
-        nano_str = "(Prerelease)";
-    else
-        nano_str = "";
-    printf ("This program is linked against GStreamer %d.%d.%d %s\n",
-          major, minor, micro, nano_str);
     return;
 }
 
