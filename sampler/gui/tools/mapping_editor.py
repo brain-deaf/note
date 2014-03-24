@@ -3,7 +3,7 @@ import math
 import mapping_editor_grid
 import sample_editor_grid
 import sample_description
-import player
+import pyplayer
 import threading
 
 class MyApp(Gtk.Window):
@@ -24,7 +24,7 @@ class MyApp(Gtk.Window):
 
 		cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
 
-		self.player = player.PyPlayer()
+		self.player = pyplayer.PyPlayer()
 
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
 		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 

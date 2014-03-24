@@ -2,3 +2,4 @@
 *.os
 .sconsign.dblite
 __pycache__
+*.pyc
