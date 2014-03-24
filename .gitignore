@@ -1,2 +1,4 @@
 *.so
 *.os
+.sconsign.dblite
+__pycache__
