@@ -1,4 +1,0 @@
-# vim: syntax=python
-SConscript('pygst/SConscript')
-env=DefaultEnvironment()
-env.Install('gui','pygst/pyplayer.so')

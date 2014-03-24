@@ -1,2 +1,4 @@
 # vim: syntax=python
-SConscript('sampler/SConscript')
+SConscript('pygst/SConscript')
+env = Environment()
+env.Install('sampler','pygst/pyplayer.so')
