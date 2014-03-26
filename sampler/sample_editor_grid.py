@@ -173,7 +173,7 @@ class SampleEditorGrid(Gtk.Grid):
 			widget.y_temp = widget.y
 			widget.x_temp = widget.x	
 
-	#when dragging a file over the grid, store the x/y coordinate of where the files should drop as members
+	#when dragging a file over the grid, store the x/y coordinate of where the files should drop as a member
 	def motion_cb(self, wid, context, x, y, time):
 		if (x < self._parent.cell_width):
 			self.drag_drop_x = self._parent.cell_width
