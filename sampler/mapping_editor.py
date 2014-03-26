@@ -203,7 +203,9 @@ class MyApp(Gtk.Window):
 					drag_widget.x_temp = new_cell
 					
 
+	#when the mouse button is released:
 	def on_button_release(self, widget, event):
+		#if a widget was being dragged, disable drag mode and update that widget's x, y, width, and height members.
 		if self.mapping_editor.dragging:
 			self.mapping_editor.dragging = False
 			if self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_draft:
@@ -222,9 +224,11 @@ def midi_received(data):
 	note     = data[1]
 	velocity = data[2]
 	if   data[0] == NOTE_ON:
+		#calls function which draws a black box in the specified note-velocity coordinate
 		win.grid_overlay.draw_midi_note((note, velocity))
 		print(data)
 	elif data[0] == RELEASE:
+		#erases the black box effect that was drawn from a note on event.
 		win.grid_overlay.draw_release_midi_note((note, velocity))
 
 win = MyApp()
