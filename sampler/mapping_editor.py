@@ -177,7 +177,10 @@ class MyApp(Gtk.Window):
 					drag_widget.y_temp = y
 					drag_widget.x_temp = x
 
+			#if the widget is being resized from the right:
 			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_right_resize):
+				#figure out the new width of the widget, and if it's different from the old width,
+				#remove/reattach the widget to the grid with the new width.
 				width_displacement = round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
 				if (width_displacement + drag_widget.x + drag_widget.width <= self.mapping_editor.grid_width
 				and drag_widget.width + width_displacement != drag_widget.width_temp): 
@@ -185,7 +188,10 @@ class MyApp(Gtk.Window):
 					self.mapping_editor.attach(drag_widget, drag_widget.x, drag_widget.y, drag_widget.width + width_displacement, drag_widget.height)
 					drag_widget.width_temp = drag_widget.width + width_displacement
 
+			#if the widget is being resized from the left:
 			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_left_resize):
+				#since a button's cell location = the left-most cell, resizing from the left means we have to move the widget
+				#to a new cell as well as change its width
 				new_cell = drag_widget.x + round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
 				if new_cell < 0:
 					new_cell = 0
