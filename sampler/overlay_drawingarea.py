@@ -1,6 +1,8 @@
 from gi.repository import Gtk
 import select_box
 
+#this was a test, currently not being used for the mapping editor
+
 class MyWindow(Gtk.Window):
 
 	def __init__(self):
