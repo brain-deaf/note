@@ -1,5 +1,6 @@
 from gi.repository import Gtk, Gdk
 
+#widget used for drawing a box (to show mouse selection). I cannot figure out how to implement this into the mapping editor.
 class SelectArea(Gtk.DrawingArea):
 	def __init__(self):
 		Gtk.DrawingArea.__init__(self)
