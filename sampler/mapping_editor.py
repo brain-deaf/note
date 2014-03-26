@@ -45,7 +45,7 @@ class MyApp(Gtk.Window):
 		css = Gtk.CssProvider()
 		css.load_from_path('test.css')
 		
-		#lol wtf i forgot what this shit is
+		#drag and drop stuff
 		screen = Gdk.Screen.get_default()
 		style_context = Gtk.StyleContext()
 		style_context.add_provider_for_screen(screen, css, Gtk.STYLE_PROVIDER_PRIORITY_USER)
