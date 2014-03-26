@@ -127,10 +127,16 @@ class MyApp(Gtk.Window):
 					self.mapping_editor.attach(drag_widget, drag_widget.x, drag_widget.y, drag_widget.width, new_height)
 					drag_widget.height = new_height
 
+			#if a button from the SampleEditorGrid is being resized from the top:
 			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_top_resize):
+				#a button's cell value is the top-most cell of the button. Since we're resizing from the top
+				#we need to attach it to a new cell.
 				new_cell   = round(mouse_y / cell_height) - 1
+				#prevent the new cell from going above the boundaries of the grid.
 				if new_cell < 0:
 					new_cell = 0
+					
+				#sets new height value for the dragged widget and removes/reattaches the widget to the grid
 				new_height = round(drag_widget.height - (new_cell - drag_widget.y))
 				if (new_height >= 1 and new_height != drag_widget.height):
 					self.mapping_editor.remove(drag_widget)
@@ -138,21 +144,31 @@ class MyApp(Gtk.Window):
 					drag_widget.height = new_height
 					drag_widget.y = new_cell
 
+			#if the widget is being moved and NOT resized
 			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_draft):
+				#figure out the distance from the original widget's position being being dragged to the current mouse position
 				height_displacement = round((mouse_y - self.mapping_editor.drag_start_y) / cell_height)
 				width_displacement = round(float(mouse_x - self.mapping_editor.drag_start_x) / float(cell_width))
+				
+				#prevent dragged widget from moving too far left beyond the boundaries of the grid.
 				if (drag_widget.x + width_displacement < 0):
 					x = 0
 				else:
 					x = drag_widget.x + width_displacement 
+					#prevent dragged widget from moving too far right beyond the boudaries of the grid.
 					if (x + drag_widget.width > self.mapping_editor.grid_width):
 						x = self.mapping_editor.grid_width - drag_widget.width
+				#prevent the dragged widget from moving too far up beyond the boundaries of the grid.
 				if (drag_widget.y + height_displacement < 0):
 					y = 0
 				else:
 					y = drag_widget.y + height_displacement
+					#prevent the dragged widget from moving too far down below the boundaries of the grid.
 					if (y + drag_widget.height > self.mapping_editor.grid_height):
 						y = self.mapping_editor.grid_height - drag_widget.height
+						
+				#remove and reattach the widget to the new x and y location on the grid as long as the new location
+				#is not equal to the old location (saves on CPU), and it is within the boundaries of the grid.
 				if ((drag_widget.y_temp != y or drag_widget.x_temp != x)
 				and (y + drag_widget.height <= self.mapping_editor.grid_height
 				or  x + drag_widget.width <= self.mapping_editor.grid_width)):
