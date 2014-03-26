@@ -1,5 +1,7 @@
 from gi.repository import Gtk, Gdk
 
+#widget used to display sample information. When you click on a button in the mapping editor, the sample's information
+#will be displayed with this widget.
 class SampleDescription(Gtk.VBox):
 	def __init__(self):
 		Gtk.VBox.__init__(self)
