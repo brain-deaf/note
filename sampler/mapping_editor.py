@@ -95,19 +95,34 @@ class MyApp(Gtk.Window):
 		self.show_all()
 	
 	def on_motion(self, widget, event):
+		#if a sample button in the SampleEditorGrid is being dragged:
 		if self.mapping_editor.dragging:
 			self.motion_trigger_flag = True
+			
+			#local variables used for ease of typing/reading algorithms in this function
 			cell_height = self.cell_height
 			cell_width = self.cell_width
+			
+			#the button widget that is currently being dragged
 			drag_widget = self.mapping_editor.drag_widget
+			
+			#the x and y coordinates of the mouse pointer
 			mouse_x = self.get_pointer()[0]
 			mouse_y = self.get_pointer()[1]
 
+			#if a button from the SampleEditorGrid is being resized from the bottom:
 			if (self.mapping_editor.get_property("window").get_cursor() == self.mapping_editor.cursor_bottom_resize):
+				#new height of the dragged widget = round(y position / cell height) - y position of the dragged widget
 				new_height = round(mouse_y / cell_height) - drag_widget.y
+				
+				#if you try to drag below the bottom boundary of the SampleEditorGrid:
 				if drag_widget.y + new_height > self.mapping_editor.grid_height:
 					new_height = self.mapping_editor.grid_height - drag_widget.height
+					
+				#if the dragged widget should be resized (i.e. if new_height != to its current height):	
 				if (new_height >= 1 and drag_widget.height != new_height):
+					#remove the dragged widget from the grid and re-attach it with new dimensions
+					#I think you have to remove it in order to resize it, I couldn't figure out another way.
 					self.mapping_editor.remove(drag_widget)
 					self.mapping_editor.attach(drag_widget, drag_widget.x, drag_widget.y, drag_widget.width, new_height)
 					drag_widget.height = new_height
