@@ -10,8 +10,12 @@ class MyApp(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self)
 		self.connect('delete-event', Gtk.main_quit)
+		
+		#sets the height and width of individual cells and applies to all cells in the grid
 		self.cell_width  = 14   #14 is the lowest GTK can handle
 		self.cell_height = 13  #13 is the lowest GTK can handle
+		
+		#sets the amount of cells along the x and y axis of the grid, starting from 0
 		self.grid_width  = 127
 		self.grid_height = 127
 
@@ -19,38 +23,51 @@ class MyApp(Gtk.Window):
 		self.add(self.pane_view)
 		self.scroll_view = Gtk.ScrolledWindow()
 
+		#stores a SampleEditorGrid object (grid of Gtk.Buttons) as a member
 		self.mapping_editor = sample_editor_grid.SampleEditorGrid(self, self.grid_width, self.grid_height)
 		self.set_size_request(1000, 700)
 
+		#stores the default arrow cursor type as a member
 		cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
 
+		#stores player object as a member
 		self.player = pyplayer.PyPlayer()
 
+		#registers the Gdk window to "listen" for mouse motion and button release events
 		self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
-		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK) 
+		self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK)
+		
+		#connects callbacks to motion and button-release events
 		self.connect('motion-notify-event', self.on_motion)
 		self.connect('button-release-event', self.on_button_release)
 
+		#sets styling of app via an external CSS file
 		css = Gtk.CssProvider()
 		css.load_from_path('test.css')
+		
+		#lol wtf i forgot what this shit is
 		screen = Gdk.Screen.get_default()
 		style_context = Gtk.StyleContext()
 		style_context.add_provider_for_screen(screen, css, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
+		#stores cairo grid_drawing widget as a member
 		self.grid_drawing = mapping_editor_grid.MappingEditorGrid(self, self.mapping_editor.grid_width, self.mapping_editor.grid_height)
+		#stores overlay widget (used to overlay the button grid on top of the grid drawing) as a member
 		self.grid_overlay = mapping_editor_grid.MappingOverlay(self, self.mapping_editor.grid_width, self.mapping_editor.grid_height)
 
+		#stores SampleDescription widget as a member
 		self.sample_description = sample_description.SampleDescription()
 
-		self.overlay = Gtk.Overlay()
+		#widget used for dragging on the middle divider between mapping editor and sample description widgets
 		self.pane_view.pack1(self.sample_description)
 		self.pane_view.pack2(self.scroll_view)
 		self.pane_view.show_all()
 
+		#overlay all the widgets on top of each other
+		self.overlay = Gtk.Overlay()
 		self.overlay2 = Gtk.Overlay()
 		self.overlay2.add(self.grid_drawing)
 		self.overlay2.add_overlay(self.grid_overlay)
-
 		self.overlay.add(self.overlay2)
 		self.overlay.add_overlay(self.mapping_editor)
 
@@ -58,9 +75,11 @@ class MyApp(Gtk.Window):
 
 		#self.overlay.add(self.grid_drawing)
 
+		#local variables used for overlay setup
 		width  = self.grid_drawing.width
 		height = self.grid_drawing.height
 
+		#sets properties on overlay widgets. If opacity is not less than 1.0, you cannot see through each overlay
 		self.overlay.set_property("opacity", 0.9)
 		self.overlay.set_property("halign", Gtk.Align.START)
 		self.overlay.set_property("valign", Gtk.Align.START)
@@ -71,8 +90,8 @@ class MyApp(Gtk.Window):
 		self.overlay2.set_property("valign", Gtk.Align.START)
 		self.overlay2.set_size_request(width, height)
 
+		#show everything (everything is hidden by default)
 		self.overlay.show_all()
-
 		self.show_all()
 	
 	def on_motion(self, widget, event):
