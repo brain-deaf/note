@@ -20,12 +20,13 @@ env.MergeFlags([
     '-lpthread',
     '-lrtmidi'])
 
-def cythonPseudoBuilder(env,source):
-    cppCode = env.Py2C(source)
-    m=env.SharedObject('midi.cpp')
-    p=env.SharedObject('player.cpp')
-    env.SharedLibrary(source,[m,p,cppCode],LIBPREFIX='')
+def cythonPseudoBuilder(env,cysource,others):
+    cppCode = env.Py2C(cysource)
+    o=env.SharedObject(others)
+    env.SharedLibrary(cysource,[o,cppCode],LIBPREFIX='')
 
 env.AddMethod(cythonPseudoBuilder,'Cython')
-c=env.Cython('pyplayer')
+o=["midi.cpp","sampler.cpp","chan.cpp"]
+c=env.Cython('pysampler',o)
+m=env.Program(["main.cpp"]+o)
 
