@@ -74,6 +74,7 @@ public:
     public:
         ~Lasso_Source() {set = nullptr;};
         Array<Zone*> zones_;
+        instrumentMappingEditor::mappingEditorGraph* parent;
         SelectedItemSet<SelectableItemType>* set;
         bool dragging;
         
@@ -84,7 +85,7 @@ public:
             int right = area.getRight();
             
             for (int i=0; i<zones_.size(); i++){
-                if (zones_[i]->x >= left && zones_[i]->x <= right){
+                if ((zones_[i]->x >= left && zones_[i]->x <= right) || (zones_[i]->x + parent->width / parent->num_columns >= left && zones_[i]->x + parent->width / parent->num_columns <= right)){
                     itemsFound.add(zones_[i]);
                 }else{
                     itemsFound.removeFirstMatchingValue(zones_[i]);

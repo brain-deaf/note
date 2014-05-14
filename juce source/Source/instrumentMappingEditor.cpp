@@ -32,6 +32,7 @@ instrumentMappingEditor::mappingEditorGraph::mappingEditorGraph()
     //lasso_source.set->addChangeListener(lasso_source);
     lasso = new LassoComponent<Zone*>;
     lasso_source = new Lasso_Source<Zone*>;
+    lasso_source->parent = this;
     lasso_source->set = new SelectedItemSet<Zone*>;
 }
 
