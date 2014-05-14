@@ -7,23 +7,6 @@ static gboolean bus_call(GstBus* bus, GstMessage* msg, gpointer data){
     switch (GST_MESSAGE_TYPE (msg)) {
         case GST_MESSAGE_EOS:{
              g_print ("End of stream\n");
-             my_player->pipeline = NULL;
-             my_player->pipeline = gst_pipeline_new("audio-player");
-             my_player->sink     = gst_element_factory_make ("autoaudiosink", "audio-output");
-             my_player->adder    = gst_element_factory_make ("adder", "mixer");
-             my_player->vol    = gst_element_factory_make ("volume", "volume-mixer");
-
-             g_object_set(G_OBJECT(my_player->vol), "volume", my_player->volume, NULL);
-             printf("set vol: %f\n", my_player->volume);
-
-             gst_bin_add_many(GST_BIN(my_player->pipeline), my_player->adder, my_player->sink, my_player->vol, NULL);
-             gst_element_link(my_player->adder, my_player->vol);
-             gst_element_link(my_player->vol, my_player->sink);
-
-             my_player->bus = gst_pipeline_get_bus (GST_PIPELINE (my_player->pipeline));
-             my_player->bus_watch_id = gst_bus_add_watch (my_player->bus, bus_call, my_player);
-             gst_object_unref (my_player->bus);
-
              break;}
         case GST_MESSAGE_ERROR: {
              gchar  *debug;
@@ -41,17 +24,6 @@ static gboolean bus_call(GstBus* bus, GstMessage* msg, gpointer data){
     return TRUE;
 }
 
-static void on_pad_added (GstElement *element, GstPad *pad, gpointer data){
-  printf("on pad added\n");
-  GstPad *sinkpad;
-  GstElement *decoder = (GstElement *) data;
-  g_print ("Dynamic pad created, linking demuxer/decoder\n");
-  sinkpad = gst_element_get_static_pad (decoder, "sink");
-  gst_pad_link (pad, sinkpad);
-  if (sinkpad == NULL) printf("error retrieving sinkpad from decoder\n");
-  gst_object_unref (sinkpad);
-}
-
 Player::Player(){
     gst_init(NULL, NULL);
     loop = g_main_loop_new(NULL, FALSE);
@@ -61,28 +33,25 @@ Player::Player(){
 
     count = 0;
     pipeline = gst_pipeline_new("audio-player");
-    source   = gst_element_factory_make("filesrc", "file-source");
     sink     = gst_element_factory_make("autoaudiosink", "sink");
     adder    = gst_element_factory_make("adder", "mixer");
-    vol      = gst_element_factory_make("volume", "volume-mixer");
-    volume = 0.1;
-    g_object_set(G_OBJECT(vol), "volume", volume, NULL);
+    //vol      = gst_element_factory_make("volume", "volume-mixer");
 
-    vol_track1 = NULL;
-    vol_track2 = NULL;
+    //g_object_set(G_OBJECT(vol), "volume", volume, NULL);
+
 
     if (!sink) printf("sink could not be created\n");
     if (!adder) printf("adder could not be created\n");
     if (!pipeline) printf("pipeline could not be created\n");
-    if (!vol) printf("volume-mixer could not be created\n");
+    //if (!vol) printf("volume-mixer could not be created\n");
 
     bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, my_player);
     gst_object_unref (bus);
 
-    gst_bin_add_many(GST_BIN(pipeline), adder, vol, sink, NULL);
-    printf("link adder and volume: %d\n", gst_element_link(adder, vol));
-    printf("link volume and sink: %d\n" , gst_element_link(vol, sink));
+    gst_bin_add_many(GST_BIN(pipeline), adder, /*vol,*/ sink, NULL);
+    //printf("link adder and volume: %d\n", gst_element_link(adder, vol));
+    printf("link adder and sink: %d\n" , gst_element_link(adder, sink));
 
     midi_in = new MidiInput();
 }
@@ -98,64 +67,30 @@ Player::~Player(){
     g_main_loop_unref(loop);
 }
 
-void Player::start_main(){
-    g_main_loop_run(loop);
+void Player::add_chan(Chan* chan){
+	//chans[chan->get_name()] = chan;
+	chan->add_bin(pipeline);
+
+	//GstPad * sinkpad = gst_element_get_request_pad(adder,"sink_%u");
+    gst_element_link(chan->converter(), adder);
+    /*if(r) {
+        std::cerr<< "error code: " << r << std::endl;
+    }
+    gst_object_unref(sinkpad);*/
 }
-    
-void Player::play_sample(char* sample_name){
-    std::string _count = std::to_string(count);
 
-    GstElement* _source   = gst_element_factory_make("filesrc", (std::string("file-source")+_count).c_str());
-    GstElement* _demuxer  = gst_element_factory_make ("oggdemux",(std::string("ogg-demuxer")+_count).c_str());
-    GstElement* _decoder  = gst_element_factory_make ("vorbisdec",(std::string("vorbis-decoder")+_count).c_str());
-    GstElement* _conv     = gst_element_factory_make ("audioconvert",(std::string("converter")+_count).c_str());
-    GstElement* _vol     = gst_element_factory_make ("volume",(std::string("volume-mixer")+_count).c_str());
+void Player::chan(const char* name, const char* path){
+	Chan x(name, path);
+	this->add_chan(&x);
+}
 
-    std::string track_name("test.ogg");
-    std::string _sample_name(sample_name);
-    if (_sample_name == track_name.c_str()){
-        printf("set volume for this sample to track 1 volume\n");
-        vol_track1 = _vol;
-        g_object_set(G_OBJECT(_vol), "volume", volume_track1, NULL);
-    }else{
-        printf("set volume for this sample to track 2 volume\n");
-        vol_track2 = _vol;
-        g_object_set(G_OBJECT(_vol), "volume", volume_track2, NULL);
-    }
-    
-
-    if (!_source || !_demuxer || !_decoder || !_conv){
-        printf("One element couldn't be created.");
-    }
-
-    gst_bin_add_many(GST_BIN(pipeline), _source, _demuxer, _decoder, _conv, _vol, NULL);
-    g_signal_connect (_demuxer, "pad-added", G_CALLBACK (on_pad_added), _decoder); 
-
-    g_object_set(G_OBJECT(_source), "location", sample_name, NULL);
-    printf("linking source and demux %d\n", gst_element_link(_source, _demuxer));
-    printf("linking decoder and conv %d\n", gst_element_link(_decoder, _conv));
-    printf("linking conv and volume   %d\n", gst_element_link(_conv, _vol));
-    printf("linking volume and adder   %d\n", gst_element_link(_vol, adder));
-
+void Player::play_sample(){
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
-    count++;
 }
     
 void Player::set_volume(double _volume){
     volume = _volume;
     g_object_set(G_OBJECT(vol), "volume", _volume, NULL);
-    return;
-}
-
-void Player::set_volume_track1(double _volume){
-    volume_track1 = _volume;
-    if (vol_track1 != NULL) g_object_set(G_OBJECT(vol_track1), "volume", _volume, NULL);
-    return;
-}
-
-void Player::set_volume_track2(double _volume){
-    volume_track2 = _volume;
-    if (vol_track2 != NULL) g_object_set(G_OBJECT(vol_track2), "volume", _volume, NULL);
     return;
 }
 

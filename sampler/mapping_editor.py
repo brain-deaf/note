@@ -230,8 +230,10 @@ def midi_received(data):
 	elif data[0] == RELEASE:
 		#erases the black box effect that was drawn from a note on event.
 		win.grid_overlay.draw_release_midi_note((note, velocity))
+	win.player.play_sample()
 
 win = MyApp()
+win.player.add_chan(b"bowl1.wav",b"/home/patrick/note/sampler/bowl1.wav")
 thread = threading.Thread(target=win.player.get_midi_in, args=(midi_received,))
 thread.daemon = True
 thread.start()

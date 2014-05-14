@@ -8,9 +8,9 @@ void MidiInput::midi_listen( double deltatime, std::vector< unsigned char > *mes
   for (unsigned int i=0; i<nBytes; i++){
      unsigned char value = message->at(i);
      std::cout << "Byte " << i << " = " << value << ", ";
-     if (i == 0 && value == 144){
+     /*if (i == 0 && value == 144){
          my_player->play_sample("test.ogg");
-     }
+     }*/
          
   }
   if ( nBytes > 0 )

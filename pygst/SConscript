@@ -24,7 +24,8 @@ def cythonPseudoBuilder(env,source):
     cppCode = env.Py2C(source)
     m=env.SharedObject('midi.cpp')
     p=env.SharedObject('player.cpp')
-    env.SharedLibrary(source,[m,p,cppCode],LIBPREFIX='')
+    c=env.SharedObject('chan.cpp')
+    env.SharedLibrary(source,[m,p,c,cppCode],LIBPREFIX='')
 
 env.AddMethod(cythonPseudoBuilder,'Cython')
 c=env.Cython('pyplayer')
